@@ -10,5 +10,5 @@ import verticle.MyVerticle
  */
 fun main(args: Array<String>) {
     val vertx = Vertx.vertx()
-    vertx.deployVerticle(MyVerticle().javaClass.name)
+    vertx.deployVerticle(MyVerticle::class.java.name)
 }

@@ -18,12 +18,12 @@ class MyVerticle : AbstractVerticle() {
                 }
                 .listen(8080)
 
-        vertx.createHttpServer()
+       /* vertx.createHttpServer()
                 .requestHandler { req ->
                     i++
                     req.response().end()
                 }
-                .listen(8081)
+                .listen(8081)*/
     }
 
 }
