@@ -2,14 +2,12 @@ package example
 
 import io.vertx.core.Vertx
 import io.vertx.ext.unit.TestContext
-import org.junit.runner.RunWith
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.Before
-import verticle.MyVerticle
-import io.vertx.groovy.ext.unit.Completion_GroovyExtension.handler
-import com.sun.xml.internal.ws.streaming.XMLStreamReaderUtil.close
+import io.vertx.ext.unit.junit.VertxUnitRunner
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import verticle.MyVerticle
 
 
 /**
