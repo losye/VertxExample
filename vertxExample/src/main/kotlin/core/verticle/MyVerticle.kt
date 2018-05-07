@@ -1,7 +1,6 @@
-package verticle
+package core.verticle
 
 import io.vertx.core.AbstractVerticle
-import io.vertx.core.Future
 
 /**
  * @Author: zhengye.zhang

@@ -1,3 +1,5 @@
+package core;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.Message;
@@ -25,11 +27,10 @@ public class FutureCompose extends AbstractVerticle {
         ).setHandler((res) -> {
             if (res.failed()) {
                 //deal with exception
-                return;
+                throw new RuntimeException();
             }
             //deal with the result
         });
-
 
 
     }

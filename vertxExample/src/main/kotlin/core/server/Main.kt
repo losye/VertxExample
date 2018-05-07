@@ -1,7 +1,7 @@
-package server
+package core.server
 
 import io.vertx.core.Vertx
-import verticle.MyVerticle
+import core.verticle.MyVerticle
 
 /**
  * @Author: zhengye.zhang
