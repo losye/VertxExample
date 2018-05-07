@@ -1,5 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.2.10'
+    ext.vertx_version = '3.5.1'
 
     repositories {
         mavenCentral()
@@ -23,11 +24,11 @@ repositories {
 }
 
 dependencies {
-    compile 'io.vertx:vertx-core:3.4.2'
-    compile 'io.vertx:vertx-web:3.4.2'
-    compile 'io.vertx:vertx-codegen:3.4.2'
+    compile "io.vertx:vertx-core:$vertx_version"
+    compile "io.vertx:vertx-web:$vertx_version"
+    compile "io.vertx:vertx-codegen:$vertx_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    testCompile group: 'io.vertx', name: 'vertx-unit', version: '3.4.2'
+    testCompile group: 'io.vertx', name: 'vertx-unit', version: "$vertx_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 

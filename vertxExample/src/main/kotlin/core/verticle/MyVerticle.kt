@@ -14,7 +14,7 @@ class MyVerticle : AbstractVerticle() {
     override fun start() {
         vertx.createHttpServer()
                 .requestHandler { req ->
-                    req.response().putHeader("content-type", "text/plain").end("Hello from Vert.x, and val: " + i)
+                    req.response().putHeader("content-type", "text/plain").end("Hello from Vert.x, and val: $i" )
                 }
                 .listen(8080)
 

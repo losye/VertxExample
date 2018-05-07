@@ -2,6 +2,7 @@ package core.server
 
 import io.vertx.core.Vertx
 import core.verticle.MyVerticle
+import web.MyFirstWebVerticle
 
 /**
  * @Author: zhengye.zhang
@@ -11,4 +12,5 @@ import core.verticle.MyVerticle
 fun main(args: Array<String>) {
     val vertx = Vertx.vertx()
     vertx.deployVerticle(MyVerticle::class.java.name)
+    vertx.deployVerticle(MyFirstWebVerticle::class.java.name)
 }
