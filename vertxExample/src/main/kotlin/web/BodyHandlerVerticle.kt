@@ -9,7 +9,7 @@ import io.vertx.ext.web.handler.BodyHandler
  * @Description:
  * @Date: 2018/5/9 下午4:57
  */
-class BodyHandlerVerticle : AbstractVerticle(){
+class BodyHandlerVerticle : AbstractVerticle() {
 
     override fun start() {
         val server = vertx.createHttpServer()
@@ -19,14 +19,16 @@ class BodyHandlerVerticle : AbstractVerticle(){
         router.route().handler(BodyHandler.create())
 
 
-        router.post("body").handler({
-            context ->
+        router.post("body").handler({ context ->
             val body = context.bodyAsJson.map
-            body.forEach({
-                (key, value) -> println("key:$key, value:$value")
+            body.forEach({ (key, value) ->
+                println("key:$key, value:$value")
             })
 
         })
+
+
+        server.requestHandler(router::accept).listen(8082)
     }
 
 }
