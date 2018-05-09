@@ -32,16 +32,24 @@ class MyFirstWebVerticle : AbstractVerticle() {
                     .end("Hello World from Vert.x-Web! with GET")
         })
 
+        router.get("/path/b").handler({
+            routingContext -> routingContext.reroute("/ping/path")
+        })
+
         router.get("/pipline/").handler({ routingContext ->
-            routingContext.response()
-                    .setChunked(true)
-                    .write("route1\n")
+            val value: String = routingContext["foo"]
+            routingContext
+                    .response()
+                    .write("$value route1\n")
 
             routingContext.next()
         })
 
-        router.get("/pipline/").order(0).handler({ routingContext ->
-            routingContext.response()
+        router.get("/pipline/").order(-1).handler({ routingContext ->
+            routingContext
+                    .put("foo", "bar")
+                    .response()
+                    .setChunked(true)
                     .write("route0\n")
             routingContext.next()
         })
@@ -50,6 +58,13 @@ class MyFirstWebVerticle : AbstractVerticle() {
             routingContext.response()
                     .write("route3\n")
                     .end()
+        })
+
+        router.get("/pipline/").failureHandler({
+            context ->
+            val statusCode = context.statusCode()
+            context.response().setStatusCode(statusCode).end("Sorry! Not yet")
+
         })
 
 
