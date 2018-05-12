@@ -4,8 +4,8 @@ import io.vertx.core.AbstractVerticle
 import io.vertx.ext.web.client.WebClient
 import io.vertx.ext.web.client.WebClientOptions
 import io.vertx.core.json.JsonObject
-
-
+import io.vertx.ext.web.client.HttpResponse
+import io.vertx.ext.web.codec.BodyCodec
 
 
 /**
@@ -37,6 +37,7 @@ class Webclient : AbstractVerticle() {
         webClient.head(8080, "myserver.mycompany.com", "/some-uri")
                 .putHeader("content-type", "application/json")
                 .putHeader("other-header", "foo")
+                .timeout(5000)
                 .addQueryParam("param1", "param_value1")
                 .addQueryParam("param2", "param_value2")
                 /*.putHeader("content-length", fileLen)
@@ -46,16 +47,30 @@ class Webclient : AbstractVerticle() {
                    }
                 });*/
                 //.sendBuffer()
-                .sendJson(hashMapOf("one" to 1), {})
+                .`as`(BodyCodec.json(User::class.java))
+                .sendJson(hashMapOf("one" to 1), {
+                    ar ->
+                    if (ar.succeeded()) {
+                        // 获取响应
+                        val response = ar.result()
+                        println(response.bodyAsJsonObject())
+
+                        //if use BodyCodec then result is json
+                        val body: User = ar.result().body()
+                    } else {
+                        println("err, ${ar.cause().message}")
+                    }
+                })
                 /*.sendJsonObject(JsonObject()
                         .put("firstName", "Dale")
                         .put("lastName", "Cooper"), {})*/
-               //.send({})
 
     }
 
 
 }
+
+data class User(val age:Int, val name:String)
 
 fun main(args: Array<String>) {
 
