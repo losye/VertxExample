@@ -35,6 +35,7 @@ class Webclient : AbstractVerticle() {
                 })
 
         webClient.head(8080, "myserver.mycompany.com", "/some-uri")
+                //.ssl(true)
                 .putHeader("content-type", "application/json")
                 .putHeader("other-header", "foo")
                 .timeout(5000)
