@@ -6,6 +6,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.web.Router;
@@ -95,17 +97,122 @@ public class JdbcVerticle extends AbstractVerticle {
     }
 
     private void deleteOne(RoutingContext routingContext) {
+        String id = routingContext.request().getParam("id");
+        checkParam(id, routingContext);
+        jdbcClient.getConnection(ar -> {
+            SQLConnection connection = ar.result();
+            connection.updateWithParams("delete from whisky where id = ?",
+                    new JsonArray().add(id),
+                    resultAsyncResult -> {
+                        if (resultAsyncResult.failed()) {
+                            routingContext.response().setStatusCode(500).end();
+                        } else {
+                            routingContext.response().setStatusCode(200).end();
+                        }
+                        connection.close();
+                    }
+            );
 
+        });
     }
 
+
     private void updateOne(RoutingContext routingContext) {
+        String id = routingContext.request().getParam("id");
+        JsonObject json = routingContext.getBodyAsJson();
+        checkParam(id, routingContext);
+        jdbcClient.getConnection(ar -> {
+            SQLConnection connection = ar.result();
+            String sql = "UPDATE Whisky SET name=?, origin=? WHERE id=?";
+            connection.updateWithParams(sql,
+                    new JsonArray().add(json.getValue("name")).add(json.getValue("origin")),
+                    result -> {
+                        if (result.failed()) {
+                            routingContext.response()
+                                    .setStatusCode(400)
+                                    .end();
+                        } else {
+                            routingContext.response()
+                                    .putHeader("content-type", "application/json; charset=utf-8")
+                                    .end(result.result().toString());
+                        }
+                        connection.close();
+                    });
+        });
     }
 
     private void getOne(RoutingContext routingContext) {
+        String id = routingContext.request().getParam("id");
+        checkParam(id, routingContext);
+        jdbcClient.getConnection(ar -> {
+            SQLConnection connection = ar.result();
+            selectById(id, connection, result -> {
+                if (result.succeeded()) {
+                    routingContext.response()
+                            .setStatusCode(200)
+                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .end(Json.encodePrettily(result.result()));
+                } else {
+                    routingContext.response()
+                            .setStatusCode(500)
+                            .end();
+                }
+                connection.close();
+            });
+        });
+
+    }
+
+    private void selectById(String id, SQLConnection sqlConnection, Handler<AsyncResult<Whisky>> resultHandler) {
+        sqlConnection.queryWithParams("select * from whisky where id = ?",
+                new JsonArray().add(id),
+                ar -> {
+                    if (ar.failed()) {
+                        resultHandler.handle(Future.failedFuture("select whisky failed"));
+                    } else {
+                        resultHandler.handle(Future.succeededFuture(new Whisky(ar.result().getRows().get(0))));
+                    }
+                });
     }
 
     private void addOne(RoutingContext routingContext) {
+        jdbcClient.getConnection(ar -> {
+            final Whisky whisky = Json.decodeValue(routingContext.getBodyAsString(), Whisky.class);
+            SQLConnection connection = ar.result();
+            insertWhisky(whisky, connection, result -> {
+                if (result.succeeded()) {
+                    routingContext.response()
+                            .setStatusCode(200)
+                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .end(Json.encodePrettily(result.result()));
+                } else {
+                    routingContext.response()
+                            .setStatusCode(500)
+                            .end();
+                }
+                connection.close();
+            });
 
+        });
+    }
+
+    private void insertWhisky(Whisky whisky, SQLConnection connection, Handler<AsyncResult<Whisky>> next) {
+        String sql = "INSERT INTO Whisky (name, origin) VALUES ?, ?";
+        connection.updateWithParams(sql,
+                new JsonArray().add(whisky.getName()).add(whisky.getOrigin()),
+                ar -> {
+                    if (ar.failed()) {
+                        next.handle(Future.failedFuture(ar.cause()));
+                    } else {
+                        next.handle(Future.succeededFuture(new Whisky(ar.result().toJson())));
+                    }
+                });
+    }
+
+    private void checkParam(String value, RoutingContext routingContext) {
+        if (value == null || "".equals(value)) {
+            routingContext.response().setStatusCode(400).end();
+        }
     }
 
 
