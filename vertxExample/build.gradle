@@ -30,7 +30,10 @@ dependencies {
     compile "io.vertx:vertx-web-client:$vertx_version"
     compile "io.vertx:vertx-mongo-client:$vertx_version"
     compile "io.vertx:vertx-service-discovery:$vertx_version"
+    compile "io.vertx:vertx-service-proxy:$vertx_version"
+    compile "io.vertx:vertx-service-provider:$vertx_version"
     compile "io.vertx:vertx-jdbc-client:$vertx_version"
+    compile "io.vertx:vertx-codegen:$vertx_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile group: 'io.vertx', name: 'vertx-unit', version: "$vertx_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
