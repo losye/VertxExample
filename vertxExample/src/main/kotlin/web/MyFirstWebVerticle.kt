@@ -32,8 +32,8 @@ class MyFirstWebVerticle : AbstractVerticle() {
                     .end("Hello World from Vert.x-Web! with GET")
         })
 
-        router.get("/path/b").handler({
-            routingContext -> routingContext.reroute("/ping/path")
+        router.get("/path/b").handler({ routingContext ->
+            routingContext.reroute("/ping/path")
         })
 
         router.get("/pipline/").handler({ routingContext ->
@@ -60,8 +60,7 @@ class MyFirstWebVerticle : AbstractVerticle() {
                     .end()
         })
 
-        router.get("/pipline/").failureHandler({
-            context ->
+        router.get("/pipline/").failureHandler({ context ->
             val statusCode = context.statusCode()
             context.response().setStatusCode(statusCode).end("Sorry! Not yet")
 

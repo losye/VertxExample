@@ -73,6 +73,3 @@ class Webclient : AbstractVerticle() {
 
 data class User(val age:Int, val name:String)
 
-fun main(args: Array<String>) {
-
-}
