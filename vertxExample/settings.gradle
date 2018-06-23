@@ -1,2 +1,3 @@
 rootProject.name = 'vertxExample'
+include 'realworld'
 
