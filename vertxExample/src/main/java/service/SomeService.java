@@ -14,8 +14,8 @@ import io.vertx.serviceproxy.ProxyHelper;
  * @Description:
  * @Date: 2018/6/11 上午11:23
  */
-@ProxyGen
-@VertxGen
+//@ProxyGen
+//@VertxGen
 public interface SomeService {
     String SERVICE_ADDRESS = "service.example";
     static SomeService createService(Vertx vertx, JsonObject config) {

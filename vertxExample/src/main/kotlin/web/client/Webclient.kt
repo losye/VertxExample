@@ -58,6 +58,7 @@ class Webclient : AbstractVerticle() {
 
                         //if use BodyCodec then result is json
                         val body: User = ar.result().body()
+                        println(body)
                     } else {
                         println("err, ${ar.cause().message}")
                     }
