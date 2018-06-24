@@ -1,5 +1,6 @@
-package setp1;
+package step.step1;
 
+import com.github.rjeschke.txtmark.Processor;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -14,8 +15,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.templ.FreeMarkerTemplateEngine;
-
-import com.github.rjeschke.txtmark.Processor;
+import step.DemoUtil;
 
 import java.util.Date;
 import java.util.List;
@@ -29,23 +29,29 @@ import java.util.stream.Collectors;
  */
 public class MainVerticle extends AbstractVerticle {
 
-    public static final int PORT = 8888;
-
-    public static void main(String[] args) {
-        Vertx vertx = Vertx.vertx();
-        vertx.deployVerticle(MainVerticle.class.getName());
-    }
-
+    private static final int PORT = 8888;
     private static final String SQL_CREATE_PAGES_TABLE = "create table if not exists Pages (Id integer identity primary key, Name varchar(255) unique, Content clob)";
     private static final String SQL_GET_PAGE = "select Id, Content from Pages where Name = ?";
     private static final String SQL_CREATE_PAGE = "insert into Pages values (NULL, ?, ?)";
     private static final String SQL_SAVE_PAGE = "update Pages set Content = ? where Id = ?";
     private static final String SQL_ALL_PAGES = "select Name from Pages";
     private static final String SQL_DELETE_PAGE = "delete from Pages where Id = ?";
-
-    private JDBCClient dbClient;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class);
+    // tag::pageRenderingHandler[]
+    private static final String EMPTY_PAGE_MARKDOWN =
+            "# A new page\n" +
+                    "\n" +
+                    "Feel-free to write in Markdown!\n";
+    // tag::indexHandler[]
+    private final FreeMarkerTemplateEngine templateEngine = FreeMarkerTemplateEngine.create();
+    private JDBCClient dbClient;
+    // end::prepareDatabase[]
+
+    public static void main(String[] args) {
+        Vertx vertx = Vertx.vertx();
+        vertx.deployVerticle(MainVerticle.class.getName());
+    }
+    // end::startHttpServer[]
 
     private Future<Void> prepareDatabase() {
         Future<Void> future = Future.future();
@@ -75,7 +81,7 @@ public class MainVerticle extends AbstractVerticle {
 
         return future;
     }
-    // end::prepareDatabase[]
+    // end::pageDeletionHandler[]
 
     // tag::startHttpServer[]
     private Future<Void> startHttpServer() {
@@ -90,8 +96,7 @@ public class MainVerticle extends AbstractVerticle {
         router.post("/create").handler(this::pageCreateHandler);
         router.post("/delete").handler(this::pageDeletionHandler);
 
-        server
-                .requestHandler(router::accept)
+        server.requestHandler(router::accept)
                 .listen(PORT, ar -> {
                     if (ar.succeeded()) {
                         LOGGER.info("HTTP server running on port 8088");
@@ -104,7 +109,7 @@ public class MainVerticle extends AbstractVerticle {
 
         return future;
     }
-    // end::startHttpServer[]
+    // end::pageCreateHandler[]
 
     // tag::pageDeletionHandler[]
     private void pageDeletionHandler(RoutingContext context) {
@@ -127,7 +132,6 @@ public class MainVerticle extends AbstractVerticle {
             }
         });
     }
-    // end::pageDeletionHandler[]
 
     // tag::pageCreateHandler[]
     private void pageCreateHandler(RoutingContext context) {
@@ -140,10 +144,7 @@ public class MainVerticle extends AbstractVerticle {
         context.response().putHeader("Location", location);
         context.response().end();
     }
-    // end::pageCreateHandler[]
-
-    // tag::indexHandler[]
-    private final FreeMarkerTemplateEngine templateEngine = FreeMarkerTemplateEngine.create();
+    // end::indexHandler[]
 
     private void indexHandler(RoutingContext context) {
         dbClient.getConnection(car -> {
@@ -162,17 +163,10 @@ public class MainVerticle extends AbstractVerticle {
 
                         context.put("title", "Wiki home");
                         context.put("pages", pages);
-                        templateEngine.render(context, "templates", "/index.ftl", ar -> {
-                            if (ar.succeeded()) {
-                                context.response().putHeader("Content-Type", "text/html");
-                                context.response().end(ar.result());
-                            } else {
-                                context.fail(ar.cause());
-                            }
-                        });
+                        templateEngine.render(context, "templates", "/index.ftl", DemoUtil.httpResultHandler(context));
 
                     } else {
-                        context.fail(res.cause());  // <5>
+                        context.fail(res.cause());
                     }
                 });
             } else {
@@ -180,7 +174,7 @@ public class MainVerticle extends AbstractVerticle {
             }
         });
     }
-    // end::indexHandler[]
+    // end::pageUpdateHandler[]
 
     // tag::pageUpdateHandler[]
     private void pageUpdateHandler(RoutingContext context) {
@@ -214,13 +208,6 @@ public class MainVerticle extends AbstractVerticle {
             }
         });
     }
-    // end::pageUpdateHandler[]
-
-    // tag::pageRenderingHandler[]
-    private static final String EMPTY_PAGE_MARKDOWN =
-            "# A new page\n" +
-                    "\n" +
-                    "Feel-free to write in Markdown!\n";
 
     private void pageRenderingHandler(RoutingContext context) {
         String page = context.request().getParam("page");
@@ -247,14 +234,7 @@ public class MainVerticle extends AbstractVerticle {
                         context.put("content", Processor.process(rawContent));
                         context.put("timestamp", new Date().toString());
 
-                        templateEngine.render(context, "templates", "/page.ftl", ar -> {
-                            if (ar.succeeded()) {
-                                context.response().putHeader("Content-Type", "text/html");
-                                context.response().end(ar.result());
-                            } else {
-                                context.fail(ar.cause());
-                            }
-                        });
+                        templateEngine.render(context, "templates", "/page.ftl", DemoUtil.httpResultHandler(context));
                     } else {
                         context.fail(fetch.cause());
                     }
@@ -267,15 +247,14 @@ public class MainVerticle extends AbstractVerticle {
     }
     // end::pageRenderingHandler[]
 
-    // tag::start[]
     @Override
-    public void start(Future<Void> startFuture) throws Exception {
+    public void start(Future<Void> startFuture) {
         Future<Void> steps = prepareDatabase().compose(v -> startHttpServer());
         steps.setHandler(startFuture.completer());
     }
     // end::start[]
 
-    public void anotherStart(Future<Void> startFuture) throws Exception {
+    public void anotherStart(Future<Void> startFuture) {
         // tag::another-start[]
         Future<Void> steps = prepareDatabase().compose(v -> startHttpServer());
         steps.setHandler(ar -> {
