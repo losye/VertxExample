@@ -45,11 +45,8 @@ public class BaseVerticle extends AbstractVerticle {
                         .setMaxFailures(cbOptions.getInteger("max-failures", 5))
                         .setTimeout(cbOptions.getLong("timeout", 30000L))
                         .setFallbackOnFailure(true)
-                        .setResetTimeout(cbOptions.getLong("reset-timeout", 300000L))
+                        .setResetTimeout(cbOptions.getLong("reset-timeout", 30000L))
         );
-
-
-
     }
 
     protected Future<Void> publishHttpEndpoint(String name, String host, int port) {
