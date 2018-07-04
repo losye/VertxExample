@@ -49,6 +49,7 @@ repositories {
 
 dependencies {
     compile "io.vertx:vertx-core:$vertx_version"
+    compile "io.vertx:vertx-rx-java2:$vertx_version"
     compile "io.vertx:vertx-web:$vertx_version"
     compile "io.vertx:vertx-codegen:$vertx_version"
     compile "io.vertx:vertx-web-client:$vertx_version"
